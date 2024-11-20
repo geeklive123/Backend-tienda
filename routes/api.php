@@ -14,7 +14,7 @@ Route::middleware('auth:sanctum')->group(function() {
     });
     Route::post('/logout', [AuthController::class, 'logout']);
 
-    // Almacenar ordenes
+   
     Route::apiResource('/pedidos', PedidoController::class );
 
 
