@@ -19,9 +19,22 @@ class PedidoController extends Controller
      */
     public function index()
     {
-        
-        return new PedidoCollection(Pedido::with('user')->with('productos')->where('estado', 0)->get());
-    }
+        $user = Auth::user(); // Obtener el usuario autenticado
+    
+     
+        if ($user->admin) {
+   
+            $pedidos = Pedido::with('user', 'productos')->orderBy('created_at', 'desc')->get();
+        } else {
+    
+            $pedidos = Pedido::with('productos')
+                ->where('user_id', $user->id)
+                ->orderBy('created_at', 'desc')
+                ->get();
+        }
+    
+        return new PedidoCollection($pedidos);
+    }   
 
     /**
      * Store a newly created resource in storage.
@@ -32,19 +45,19 @@ class PedidoController extends Controller
     public function store(Request $request)
     {
         
-        // Almacenar una orden
+     
         $pedido = new Pedido;
         $pedido->user_id = Auth::user()->id;
         $pedido->total = $request->total;
         $pedido->save();
 
-        // Obtener el ID del pedido
+   
         $id = $pedido->id;
 
-        // Obtener los productos
+   
         $productos = $request->productos;
 
-        // Formatear un arreglo 
+      
         $pedido_producto = [];
 
         foreach($productos as $producto) {
@@ -57,7 +70,7 @@ class PedidoController extends Controller
             ];
         }
 
-        // Almacenar en la BD
+      
         PedidoProducto::insert($pedido_producto);
         
         return [
@@ -89,9 +102,9 @@ class PedidoController extends Controller
         $pedido->estado = 1;
         $pedido->save();
 
-        return [
+        return response()->json([
             'pedido' => $pedido
-        ];
+        ]);
     }
 
     /**
@@ -100,8 +113,21 @@ class PedidoController extends Controller
      * @param  \App\Models\Pedido  $pedido
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Pedido $pedido)
-    {
-        //
-    }
+  
+public function destroy(Pedido $pedido)
+{
+   
+    if ($pedido->estado == 0) {
+        
+        PedidoProducto::where('pedido_id', $pedido->id)->delete();
+        
+       
+        $pedido->delete();
+        
+        return response()->json([
+            'message' => 'Pedido cancelado y eliminado con éxito',
+        ]);
+    } 
+}
+
 }

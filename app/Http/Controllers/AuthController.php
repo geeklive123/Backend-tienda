@@ -12,7 +12,7 @@ class AuthController extends Controller
 {
   
     public function register(RegistroRequest $request) {
-        // Validar el registro
+
         $data = $request->validated();
 
         // Crear el usuario
@@ -22,7 +22,7 @@ class AuthController extends Controller
             'password' => bcrypt($data['password'])
         ]);
 
-        // Retornar una respuesta
+ 
         return [
             'token' => $user->createToken('token')->plainTextToken,
             'user' => $user
@@ -32,14 +32,14 @@ class AuthController extends Controller
     public function login(LoginRequest $request) {
         $data = $request->validated();
 
-        // Revisar el password
+   
         if(!Auth::attempt($data)) {
             return response([
                 'errors' => ['El email o el password son incorrectos']
             ], 422);
         }
 
-        // Autenticar al usuario
+
         $user = Auth::user();
         return [
             'token' => $user->createToken('token')->plainTextToken,

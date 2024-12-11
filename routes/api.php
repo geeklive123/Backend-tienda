@@ -16,6 +16,7 @@ Route::middleware('auth:sanctum')->group(function() {
 
    
     Route::apiResource('/pedidos', PedidoController::class );
+    
 
 
 });
